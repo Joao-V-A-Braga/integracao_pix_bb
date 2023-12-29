@@ -36,17 +36,21 @@ class BankViewTestCase(TestCase):
             response = self.client.get(reverse('banks_index'), {'page': 1})
             mock_bank.assert_called()
             
-            lengthOfResults = len(response.data.get("results", []))
+            results = response.data.get("results", [])
+            lengthOfResults = len(results)
             count = response.data.get("count", [])
-            
+
             self.assertEqual(data["expectedQtt"], count)
             self.assertLessEqual(lengthOfResults, 10)
+
+            self.assertIn("name", results[0])
+            self.assertIn("code", results[0])
 
     dataProviderContentToIndexAction = [
         {
             "message": "whenDataIsTwoBanks",
             "content": [
-                {"name":"Banco A", "code":"001"},
+                {"name":None, "code":None},
                 {"name":"Banco B", "code":"002"}
             ],
             "expectedQtt": 2
