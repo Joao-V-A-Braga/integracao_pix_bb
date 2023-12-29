@@ -1,32 +1,19 @@
-from django.test import TestCase
+from .BaseTestCaseView import BaseTestCaseView
 from django.urls import reverse
-from unittest.mock import patch, Mock
+from unittest.mock import patch, MagicMock
 
 from rest_framework import status
 
-class BankViewTestCase(TestCase):
+class BankViewTestCase(BaseTestCaseView):
+
+    # Index -----------------------------------------------
     def testStatusCodeOnIndexAction(self):
 
-        # Quando se faz um Get para a url "banks_index"
-        response = self.client.get(reverse('banks_index'))
-        message = "whenMethodIsGet"
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK, message)
-    
-        # Quando se faz um Post para a url "banks_index"
-        response = self.client.post(reverse('banks_index'))
-        message = "whenMethodIsPost"
-
-        self.assertNotEqual(
-            response.status_code,
-            status.HTTP_200_OK,
-            message
-            )
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_405_METHOD_NOT_ALLOWED,
-            message
-            )
+        self.assertsResponseByMethodAndRouteName(
+            status_expected=status.HTTP_200_OK, 
+            method='get', 
+            route_name='banks_index'
+        )
 
     @patch('financial.models.Bank.Bank.objects.all')
     def testContentOnIndexAction(self, mock_bank):
@@ -72,5 +59,57 @@ class BankViewTestCase(TestCase):
             "expectedQtt": 24
         }
     ]
+
+    # Create -----------------------------------------------
+    def testStatusCodeOnCreateAction(self):
+        for data in self.dataProviderStatusCodeOnCreateAction:
+            self.assertsResponseByMethodAndRouteName(
+                status_expected=data["status_expected"], 
+                method='post', 
+                route_name='banks_create',
+                content_request=data["content_request"],
+                response_expected=data["response_expected"]
+            )
+
+    dataProviderStatusCodeOnCreateAction = [
+        {
+            "status_expected":status.HTTP_201_CREATED, 
+            "content_request":{'name': 'Banco Teste', 'code': '001'},
+            "response_expected":None
+        },
+        {
+            "status_expected":status.HTTP_400_BAD_REQUEST, 
+            "content_request":{'name': 'Banco Teste'},
+            "response_expected": {'code': ['This field is required.']}
+        },
+        {
+            "status_expected":status.HTTP_400_BAD_REQUEST, 
+            "content_request":{'code': '987'},
+            "response_expected": {'name': ['This field is required.']}
+        }
+    ]
     
-    
+    @patch('financial.forms.BankForm.BankForm.is_valid')
+    @patch('financial.forms.BankForm.BankForm.save') 
+    def testAssertCalledBankCreate(
+        self, mock_form_save:MagicMock, mock_form_is_valid:MagicMock
+        ):
+        
+        #Quando is_valid é True se espera que chame o método save
+        mock_form_is_valid.return_value = True
+        self.client.post(reverse('banks_create'))
+
+        mock_form_is_valid.assert_called_once()
+        mock_form_save.assert_called_once()
+        
+        # Reseta os mocks para o segundo teste
+        mock_form_is_valid.reset_mock()
+        mock_form_save.reset_mock()
+
+        # Envia a requisição com valid False
+        mock_form_is_valid.return_value = False
+        self.client.post(reverse('banks_create'))
+        
+        #Quando is_valid é Falso não espera que se chame o método save
+        mock_form_is_valid.assert_called_once()
+        mock_form_save.assert_not_called()
