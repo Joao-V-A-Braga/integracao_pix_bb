@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
+from unittest.mock import MagicMock
 
 from rest_framework import status
 
@@ -13,7 +14,8 @@ class BaseTestCaseView(TestCase):
         method:str, 
         route_name:str,
         content_request:object=None,
-        response_expected:object=None
+        response_expected:object=None,
+        debug=None
         ):
 
         other = "post"
@@ -22,15 +24,16 @@ class BaseTestCaseView(TestCase):
         
         # Quando se faz a requisição com o metodo e se espera o status passado
         method_function = getattr(self.client, method.lower())
-        response = method_function(reverse(route_name), content_request)
+        response = method_function(reverse(route_name), content_request, content_type='application/json')
         
-        message = f"whenMethodIs{method.capitalize()}"
+        requestInfoMessage = f"| Method: {method.capitalize()} | Content: {content_request} | Response: {response.data}"
+        message = f"whenMethodIs {requestInfoMessage}"
         
         # Status esperado
         self.assertEqual(response.status_code, status_expected, message)
         # Resposta esperada
         if(response_expected):
-            self.assertEqual(response.data, response_expected, "This response is not expected")
+            self.assertEqual(response.data, response_expected, f"This response is not expected {requestInfoMessage}")
         
         # Quando se faz a requisição com outro metodo e se espera o status 405
         method_function = getattr(self.client, other.lower())
@@ -47,3 +50,28 @@ class BaseTestCaseView(TestCase):
             status.HTTP_405_METHOD_NOT_ALLOWED,
             message
             )
+        
+    def assertIsValidAndSaveIsCalledByMethodAndRouteName(
+        self, mock_form_is_valid:MagicMock, mock_form_save:MagicMock, method:str, r_name:str 
+    ):
+        #Define o método
+        method_function = getattr(self.client, method.lower())
+        
+        #Quando is_valid é True se espera que chame o método save
+        mock_form_is_valid.return_value = True
+        method_function(reverse(r_name))
+
+        mock_form_is_valid.assert_called_once()
+        mock_form_save.assert_called_once()
+        
+        # Reseta os mocks para o segundo teste
+        mock_form_is_valid.reset_mock()
+        mock_form_save.reset_mock()
+
+        # Envia a requisição com valid False
+        mock_form_is_valid.return_value = False
+        method_function(reverse(r_name))
+        
+        #Quando is_valid é Falso não espera que se chame o método save
+        mock_form_is_valid.assert_called_once()
+        mock_form_save.assert_not_called()

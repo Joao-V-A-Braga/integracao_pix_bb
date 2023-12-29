@@ -23,9 +23,9 @@ def index(request):
             "Ocorreu um erro interno ao tentar buscar os bancos cadastrados, por gentileza contacte o nosso suporte.",
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
 @api_view(['POST'])
 def create(request):
-    
     try:
         bankform = BankForm(request.data)
         if bankform.is_valid():
@@ -35,5 +35,40 @@ def create(request):
     except:
         return Response(
             "Ocorreu um erro interno ao tentar cadastrar um novo banco, por gentileza contacte o nosso suporte.",
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+@api_view(['PUT'])
+def update(request):
+    try:
+        bank = Bank.objects.get(id=request.data.get("id"))
+        if not bank:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        bankSerialized = BankSerializer(bank)
+        
+        data = {**bankSerialized.data, **request.data}
+        bankform = BankForm(data, instance=bank)
+        if bankform.is_valid():
+            bankform.save()
+            return Response(status=status.HTTP_200_OK)
+        return Response(bankform.errors, status=status.HTTP_400_BAD_REQUEST)
+    except:
+        return Response(
+            "Ocorreu um erro interno ao tentar editar um banco, por gentileza contacte o nosso suporte.",
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+@api_view(['DELETE'])
+def delete(request):
+    try:
+        bank = Bank.objects.get(id=request.data.get("id"))
+        if not bank:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        Bank.delete(bank)
+        return Response(status=status.HTTP_200_OK)
+    except:
+        return Response(
+            "Ocorreu um erro interno ao tentar deletar um banco, por gentileza contacte o nosso suporte.",
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

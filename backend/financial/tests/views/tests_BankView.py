@@ -4,11 +4,12 @@ from unittest.mock import patch, MagicMock
 
 from rest_framework import status
 
+from ...models.Bank import Bank
+
 class BankViewTestCase(BaseTestCaseView):
 
     # Index -----------------------------------------------
     def testStatusCodeOnIndexAction(self):
-
         self.assertsResponseByMethodAndRouteName(
             status_expected=status.HTTP_200_OK, 
             method='get', 
@@ -90,26 +91,107 @@ class BankViewTestCase(BaseTestCaseView):
     ]
     
     @patch('financial.forms.BankForm.BankForm.is_valid')
-    @patch('financial.forms.BankForm.BankForm.save') 
+    @patch('financial.forms.BankForm.BankForm.save')
     def testAssertCalledBankCreate(
         self, mock_form_save:MagicMock, mock_form_is_valid:MagicMock
         ):
-        
-        #Quando is_valid é True se espera que chame o método save
-        mock_form_is_valid.return_value = True
-        self.client.post(reverse('banks_create'))
+        self.assertIsValidAndSaveIsCalledByMethodAndRouteName(
+            mock_form_is_valid=mock_form_is_valid, mock_form_save=mock_form_save, 
+            method="post", r_name="banks_create"
+        )
+    
+    # Update -----------------------------------------------
+    @patch('financial.forms.BankForm.BankForm.save')
+    @patch('financial.models.Bank.Bank.objects.get')
+    def testStatusCodeOnUpdateAction(self, mock_get:MagicMock, mock_save:MagicMock):
+        mock_get.side_effect = self.fake_bank_object_get
+        for data in self.dataProviderStatusCodeOnUpdateAction:
+            self.assertsResponseByMethodAndRouteName(
+                status_expected=data["status_expected"], 
+                method='put',
+                route_name='banks_update',
+                content_request=data["content_request"],
+            )
 
-        mock_form_is_valid.assert_called_once()
-        mock_form_save.assert_called_once()
+    def fake_bank_object_get(*args, **kwargs):
+        if kwargs.get("id"):
+            return Bank(id=kwargs.get("id"), code='001', name='Bank Name')
+        else: return None
+
+    dataProviderStatusCodeOnUpdateAction = [
+        {
+            "status_expected":status.HTTP_200_OK, 
+            "content_request":{'id': 1, 'code': '001'},
+        },
+        {
+            "status_expected":status.HTTP_200_OK, 
+            "content_request":{'id': 234, 'name': 'Bank Name'},
+        },
+        {
+            "status_expected":status.HTTP_404_NOT_FOUND, 
+            "content_request":{'name': 'Banco Teste'},
+        },
+        {
+            "status_expected":status.HTTP_404_NOT_FOUND, 
+            "content_request":{'code': '987'},
+        }
+    ]
+
+    @patch('financial.models.Bank.Bank.objects.get')
+    @patch('financial.forms.BankForm.BankForm.is_valid')
+    @patch('financial.forms.BankForm.BankForm.save')
+    def testAssertCalledBankUpdate(
+        self, mock_save:MagicMock, mock_is_valid:MagicMock, mock_get:MagicMock):
+        mock_get.return_value = Bank(id=1, code='001', name='Bank Name')
+        self.assertIsValidAndSaveIsCalledByMethodAndRouteName(
+            mock_form_is_valid=mock_is_valid, mock_form_save=mock_save, 
+            method="put", r_name="banks_update"
+        )
         
         # Reseta os mocks para o segundo teste
-        mock_form_is_valid.reset_mock()
-        mock_form_save.reset_mock()
-
-        # Envia a requisição com valid False
-        mock_form_is_valid.return_value = False
-        self.client.post(reverse('banks_create'))
+        mock_save.reset_mock()
+        mock_is_valid.reset_mock()
+        mock_get.reset_mock()
         
-        #Quando is_valid é Falso não espera que se chame o método save
-        mock_form_is_valid.assert_called_once()
-        mock_form_save.assert_not_called()
+        # Se get não tiver um id não chama save nem is_valid
+        mock_get.side_effect = self.fake_bank_object_get
+        self.client.put(
+            reverse('banks_update'), {'name': 'Banco Teste', 'code': '987'}
+            )
+        
+        mock_is_valid.assert_not_called()
+        mock_save.assert_not_called()
+        
+    # Delete -----------------------------------------------
+    @patch('financial.models.Bank.Bank.objects.get')
+    def testStatusCodeOnDeleteAction(self, mock_get:MagicMock):
+        mock_get.side_effect = self.fake_bank_object_get
+        for data in self.dataProviderStatusCodeOnDeleteAction:
+            self.assertsResponseByMethodAndRouteName(
+                status_expected=data["status_expected"], 
+                method='delete',
+                route_name='banks_delete',
+                content_request=data["content_request"],
+            )
+            
+    dataProviderStatusCodeOnDeleteAction = [
+        {
+            "status_expected":status.HTTP_200_OK, 
+            "content_request":{'id': 1},
+        },
+        {
+            "status_expected":status.HTTP_404_NOT_FOUND, 
+            "content_request":{},
+        }
+    ]
+    
+    @patch('financial.models.Bank.Bank.objects.get')
+    @patch('financial.models.Bank.Bank.delete')
+    def testAssertCalledBankDelete(
+        self, mock_delete:MagicMock, mock_get:MagicMock
+        ):
+        mock_get.side_effect = self.fake_bank_object_get
+        self.client.delete(
+            reverse('banks_delete'), {'id': 1}, content_type='application/json'
+            )
+        mock_delete.assert_called_once()
