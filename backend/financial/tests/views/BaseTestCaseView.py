@@ -24,7 +24,9 @@ class BaseTestCaseView(TestCase):
         
         # Quando se faz a requisição com o metodo e se espera o status passado
         method_function = getattr(self.client, method.lower())
-        response = method_function(reverse(route_name), content_request, content_type='application/json')
+        response = method_function(
+            reverse(route_name), content_request, content_type='application/json'
+            )
         
         requestInfoMessage = f"| Method: {method.capitalize()} | Content: {content_request} | Response: {response.data}"
         message = f"whenMethodIs {requestInfoMessage}"
@@ -33,7 +35,10 @@ class BaseTestCaseView(TestCase):
         self.assertEqual(response.status_code, status_expected, message)
         # Resposta esperada
         if(response_expected):
-            self.assertEqual(response.data, response_expected, f"This response is not expected {requestInfoMessage}")
+            self.assertEqual(
+                response.data, response_expected, 
+                f"This response is not expected {requestInfoMessage}"
+                )
         
         # Quando se faz a requisição com outro metodo e se espera o status 405
         method_function = getattr(self.client, other.lower())
@@ -52,7 +57,8 @@ class BaseTestCaseView(TestCase):
             )
         
     def assertIsValidAndSaveIsCalledByMethodAndRouteName(
-        self, mock_form_is_valid:MagicMock, mock_form_save:MagicMock, method:str, r_name:str 
+        self, mock_form_is_valid:MagicMock, mock_form_save:MagicMock, 
+        method:str, r_name:str 
     ):
         #Define o método
         method_function = getattr(self.client, method.lower())
@@ -75,3 +81,24 @@ class BaseTestCaseView(TestCase):
         #Quando is_valid é Falso não espera que se chame o método save
         mock_form_is_valid.assert_called_once()
         mock_form_save.assert_not_called()
+        
+    def assertContentOnIndexAction(
+        self, mock_objects_all:MagicMock, route:str, dataProvider:list[object], 
+        expectedAttrInResponse:list[str]
+        ):
+        for data in dataProvider:
+            mock_objects_all().order_by.return_value = data["content"]
+
+            response = self.client.get(reverse(route), {'page': 1})
+            mock_objects_all.assert_called()
+
+            results = response.data.get("results", [])
+            
+            lengthOfResults = len(results)
+            count = response.data.get("count", [])
+
+            self.assertEqual(data["expectedQtt"], count)
+            self.assertLessEqual(lengthOfResults, 10)
+
+            for attr in expectedAttrInResponse:
+                self.assertIn(attr, results[0])
