@@ -45,7 +45,7 @@ class BankAccountViewTestCase(BaseTestCaseView):
             "expectedQtt": 2
         },
         {
-            "message": "whenDataIsMoreThanTenBanks",
+            "message": "whenDataIsMoreThanTenBankAccounts",
             "content": [
                 {
                     "number":f'124312{i}', "agency":f'3422{i}', 
@@ -57,7 +57,7 @@ class BankAccountViewTestCase(BaseTestCaseView):
             "expectedQtt": 13
         },
         {
-            "message": "whenDataIsMoreThanTenBanks",
+            "message": "whenDataIsMoreThanTenBankAccounts",
             "content": [
                 {
                     "number":f'124312{i}', "agency":f'3422{i}', 

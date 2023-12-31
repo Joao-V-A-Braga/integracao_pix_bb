@@ -91,6 +91,9 @@ class BaseTestCaseView(TestCase):
 
             response = self.client.get(reverse(route), {'page': 1})
             mock_objects_all.assert_called()
+            
+            if (response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR):
+                print(f"\n\n{response.data}\n\n")
 
             results = response.data.get("results", [])
             
