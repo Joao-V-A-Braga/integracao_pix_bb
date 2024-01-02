@@ -41,8 +41,9 @@ def create(request):
 @api_view(['PUT'])
 def update(request):
     try:
-        pixAccount = PixAccount.objects.get(bankAccount=request.data.get("bankAccount"))
-        if not pixAccount:
+        try:
+            pixAccount = PixAccount.objects.get(bankAccount=request.data.get("bankAccount"))
+        except PixAccount.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         pixAccountSerialized = PixAccountSerializer(pixAccount)
 
@@ -65,8 +66,9 @@ def update(request):
 @api_view(['DELETE'])
 def delete(request):
     try:
-        pixAccount = PixAccount.objects.get(bankAccount=request.data.get("bankAccount"))
-        if not pixAccount:
+        try:
+            pixAccount = PixAccount.objects.get(bankAccount=request.data.get("bankAccount"))
+        except PixAccount.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         PixAccount.delete(pixAccount)

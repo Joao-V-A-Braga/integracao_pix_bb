@@ -116,7 +116,7 @@ class BankViewTestCase(BaseTestCaseView):
     def fake_bank_object_get(*args, **kwargs):
         if kwargs.get("id"):
             return Bank(id=kwargs.get("id"), code='001', name='Bank Name')
-        else: return None
+        else: raise Bank.DoesNotExist
 
     dataProviderStatusCodeOnUpdateAction = [
         {

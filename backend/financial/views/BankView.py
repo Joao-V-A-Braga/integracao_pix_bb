@@ -41,8 +41,9 @@ def create(request):
 @api_view(['PUT'])
 def update(request):
     try:
-        bank = Bank.objects.get(id=request.data.get("id"))
-        if not bank:
+        try:
+            bank = Bank.objects.get(id=request.data.get("id"))
+        except Bank.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         bankSerialized = BankSerializer(bank)
         
@@ -61,8 +62,9 @@ def update(request):
 @api_view(['DELETE'])
 def delete(request):
     try:
-        bank = Bank.objects.get(id=request.data.get("id"))
-        if not bank:
+        try:
+            bank = Bank.objects.get(id=request.data.get("id"))
+        except Bank.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         Bank.delete(bank)

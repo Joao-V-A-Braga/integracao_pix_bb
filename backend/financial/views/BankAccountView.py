@@ -41,9 +41,11 @@ def create(request):
 @api_view(['PUT'])
 def update(request):
     try:
-        bankAccount = BankAccount.objects.get(id=request.data.get("id"))
-        if not bankAccount:
+        try:
+            bankAccount = BankAccount.objects.get(id=request.data.get("id"))
+        except BankAccount.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+        
         bankAccountSerialized = BankAccountSerializer(bankAccount)
         
         data = {**bankAccountSerialized.data, **request.data}
@@ -52,17 +54,18 @@ def update(request):
             bankAccountForm.save()
             return Response(status=status.HTTP_200_OK)
         return Response(bankAccountForm.errors, status=status.HTTP_400_BAD_REQUEST)
-    except:
+    except Exception as e:
         return Response(
-            "Ocorreu um erro interno ao tentar editar uma conta bancária, por gentileza contacte o nosso suporte.",
+            f"\n\n{e}\n\nOcorreu um erro interno ao tentar editar uma conta bancária, por gentileza contacte o nosso suporte.",
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         
 @api_view(['DELETE'])
 def delete(request):
     try:
-        bankAccount = BankAccount.objects.get(id=request.data.get("id"))
-        if not bankAccount:
+        try:
+            bankAccount = BankAccount.objects.get(id=request.data.get("id"))
+        except BankAccount.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         BankAccount.delete(bankAccount)

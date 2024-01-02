@@ -210,7 +210,7 @@ class PixAccountViewTestCase(BaseTestCaseView):
                         bank=Bank(id=1, name='Banco A', code="001")
                     )
                 )
-        else: return None
+        else: raise PixAccount.DoesNotExist
 
     dataProviderStatusCodeOnUpdateAction = [
         {

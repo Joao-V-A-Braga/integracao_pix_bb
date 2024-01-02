@@ -168,7 +168,7 @@ class BankAccountViewTestCase(BaseTestCaseView):
                 cnpj='61.015.142/0001-17', 
                 bank=Bank(id=1, name='Banco A', code="001")
                 )
-        else: return None
+        else: raise BankAccount.DoesNotExist("BankAccount matching the query does not exist.")
 
     dataProviderStatusCodeOnUpdateAction = [
         {
