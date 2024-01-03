@@ -8,17 +8,6 @@ import time
 
 class PixAccountTestCase(TestCase):
 
-    bankAccount= {
-        "number": "12431234",
-        "agency": "342234",
-        "cnpj": "61.015.142/0001-17",
-    }
-    
-    bank= {
-        "name": "Banco do Brasil",
-        "code": "001"
-    }
-
     def testPixStrReturn(self):
         for data in self.dataProviderPixKey:
             bank = Bank(
@@ -43,24 +32,24 @@ class PixAccountTestCase(TestCase):
 
             self.assertEqual(
                 pixAccount.__str__(), 
-                f"{bank.name} {pixAccount.key}"
+                f"{bank.name} {data['pixKey']}"
             )
     
     dataProviderPixKey = [
         {
-            "message": "whenCnpjIsNone",
+            "message": "whenPixKeyIsNone",
             "pixKey": None
         },
         {
-            "message": "whenNameOfBankIsNone",
+            "message": "whenPixKeyACnpj",
             "pixKey": "61.015.142/0001-17"
         },
         {
-            "message": "whenNameOfBankIsNone",
+            "message": "whenPixKeyIsWhatever",
             "pixKey": "dsfasdfjlkasdkfjçlasdfa"
         },
         {
-            "message": "whenNameOfBankIsNone",
+            "message": "whenIsATelNumber",
             "pixKey": "(62) 98177-6411"
         }
     ]
