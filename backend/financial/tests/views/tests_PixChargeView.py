@@ -168,7 +168,7 @@ class PixChargeViewTestCase(BaseTestCaseView):
         
     dataProviderContentFindAction = [
         {
-            "message": "whereE2eidIsNone",
+            "message": "whenE2eidIsNone",
             "content": {
                 "id": 1,
                 "pixAccount":PixAccount(
@@ -187,7 +187,7 @@ class PixChargeViewTestCase(BaseTestCaseView):
             }
         },
         {
-            "message": "whereE2eidIsNotNone",
+            "message": "whenE2eidIsNotNone",
             "content": {
                 "id": 1,
                 "pixAccount":PixAccount(

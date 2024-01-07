@@ -103,7 +103,9 @@ class BaseTestCaseView(TestCase):
             lengthOfResults = len(results)
             count = response.data.get("count", [])
 
-            self.assertEqual(data["expectedQtt"], count)
+            self.assertEqual(
+                data["expectedQtt"], count,
+                f"This quantity of elements is unexpected - {data['message']} \n\n{response.data}")
             self.assertLessEqual(lengthOfResults, 10)
 
             for attr in expectedAttrInResponse:
