@@ -6,6 +6,7 @@ from .views import BankAccountView
 from .views import PixAccountView
 from .views import PixChargeView
 from .views import ParcelView
+from .views import InvoiceToReceiveView
 
 urlpatterns = [
     #banks
@@ -33,4 +34,8 @@ urlpatterns = [
     #parcels
     path('parcels/', ParcelView.index, name='parcels_index'),
     path('parcels/<int:id>', ParcelView.find, name='parcels_find'),
+    
+    #invoice to receive
+    path('invoices-to-receive/', InvoiceToReceiveView.index, name='invoice_to_receive_index'),
+    path('invoices-to-receive/<int:id>', InvoiceToReceiveView.find, name='invoice_to_receive_find'),
 ]
