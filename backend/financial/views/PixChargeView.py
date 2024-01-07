@@ -4,7 +4,6 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from ..models.PixCharge import PixCharge
-from ..forms.PixChargeForm import PixChargeForm
 from ..serializers.PixChargeSerializer import PixChargeSerializer
 
 @api_view(['GET'])

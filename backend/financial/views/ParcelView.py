@@ -4,7 +4,6 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from ..models.ParcelPix import ParcelPix
-from ..forms.PixChargeForm import PixChargeForm
 from ..serializers.ParcelPixSerializer import ParcelPixSerializer
 
 @api_view(['GET'])
