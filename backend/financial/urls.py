@@ -4,6 +4,7 @@ from django.urls import path
 from .views import BankView
 from .views import BankAccountView
 from .views import PixAccountView
+from .views import PixChargeView
 
 urlpatterns = [
     #banks
@@ -23,4 +24,8 @@ urlpatterns = [
     path('pix-accounts/new', PixAccountView.create, name='pix_accounts_create'),
     path('pix-accounts/update', PixAccountView.update, name='pix_accounts_update'),
     path('pix-accounts/delete', PixAccountView.delete, name='pix_accounts_delete'),
+    
+    #pix charges
+    path('pix-charges/', PixChargeView.index, name='pix_charges_index'),
+    path('pix-charges/<int:id>', PixChargeView.find, name='pix_charges_find'),
 ]

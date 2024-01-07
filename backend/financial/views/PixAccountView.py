@@ -18,9 +18,9 @@ def index(request):
 
         serializer = PixAccountSerializer(result_page, many=True)
         return paginator.get_paginated_response(serializer.data)
-    except Exception as e:
+    except:
         return Response(
-            f"\n\n{e}\n\nOcorreu um erro interno ao tentar buscar as contas pix cadastradas, por gentileza contacte o nosso suporte.",
+            "Ocorreu um erro interno ao tentar buscar as contas pix cadastradas, por gentileza contacte o nosso suporte.",
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 

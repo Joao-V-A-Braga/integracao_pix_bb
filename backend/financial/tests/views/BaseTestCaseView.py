@@ -15,7 +15,8 @@ class BaseTestCaseView(TestCase):
         route_name:str,
         content_request:object=None,
         response_expected:object=None,
-        debug=None
+        debug=None,
+        path_attr:object=None
         ):
 
         other = "post"
@@ -25,7 +26,8 @@ class BaseTestCaseView(TestCase):
         # Quando se faz a requisição com o metodo e se espera o status passado
         method_function = getattr(self.client, method.lower())
         response = method_function(
-            reverse(route_name), content_request, content_type='application/json'
+            reverse(route_name, kwargs=path_attr), content_request, 
+            content_type='application/json'
             )
         
         requestInfoMessage = f"| Method: {method.capitalize()} | Content: {content_request} | Response: {response.data}"
@@ -42,7 +44,8 @@ class BaseTestCaseView(TestCase):
         
         # Quando se faz a requisição com outro metodo e se espera o status 405
         method_function = getattr(self.client, other.lower())
-        response = method_function(reverse(route_name), content_request)
+        response = method_function(
+            reverse(route_name, kwargs=path_attr), content_request)
         message = f"whenMethodIsOther"
         
         self.assertNotEqual( #Não se espera o mesmo status
@@ -105,3 +108,21 @@ class BaseTestCaseView(TestCase):
 
             for attr in expectedAttrInResponse:
                 self.assertIn(attr, results[0])
+                
+    def assertContentOnFindAction(
+        self, mock_objects_get:MagicMock, route:str, dataProvider:list[object], 
+        expectedAttrInResponse:list[str], path_attr:object=None
+        ):
+        for data in dataProvider:
+            mock_objects_get.return_value = data["content"]
+
+            response = self.client.get(reverse(route, kwargs=path_attr))
+            mock_objects_get.assert_called()
+            
+            if (response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR):
+                print(f"\n\n{response}\n\n")
+
+            result = response.data
+
+            for attr in expectedAttrInResponse:
+                self.assertIn(attr, result, data['message'])
