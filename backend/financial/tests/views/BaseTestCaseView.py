@@ -16,7 +16,8 @@ class BaseTestCaseView(TestCase):
         content_request:object=None,
         response_expected:object=None,
         debug=None,
-        path_attr:object=None
+        path_attr:object=None,
+        content_type:str="application/json"
         ):
 
         other = "post"
@@ -26,8 +27,9 @@ class BaseTestCaseView(TestCase):
         # Quando se faz a requisição com o metodo e se espera o status passado
         method_function = getattr(self.client, method.lower())
         response = method_function(
-            reverse(route_name, kwargs=path_attr), content_request, 
-            content_type='application/json'
+            reverse(route_name, kwargs=path_attr), content_request, content_type=content_type
+            ) if content_type else method_function(
+            reverse(route_name, kwargs=path_attr), content_request
             )
         
         requestInfoMessage = f"| Method: {method.capitalize()} | Content: {content_request} | Response: {response.data}"
@@ -44,8 +46,12 @@ class BaseTestCaseView(TestCase):
         
         # Quando se faz a requisição com outro metodo e se espera o status 405
         method_function = getattr(self.client, other.lower())
+
         response = method_function(
-            reverse(route_name, kwargs=path_attr), content_request)
+            reverse(route_name, kwargs=path_attr), content_request, content_type=content_type
+            ) if content_type else method_function(
+            reverse(route_name, kwargs=path_attr), content_request
+            )
         message = f"whenMethodIsOther"
         
         self.assertNotEqual( #Não se espera o mesmo status
