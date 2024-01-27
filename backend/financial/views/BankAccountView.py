@@ -54,9 +54,9 @@ def update(request):
             bankAccountForm.save()
             return Response(status=status.HTTP_200_OK)
         return Response(bankAccountForm.errors, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
+    except:
         return Response(
-            f"\n\n{e}\n\nOcorreu um erro interno ao tentar editar uma conta bancária, por gentileza contacte o nosso suporte.",
+            f"Ocorreu um erro interno ao tentar editar uma conta bancária, por gentileza contacte o nosso suporte.",
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         

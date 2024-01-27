@@ -34,9 +34,9 @@ def create(request):
             productform.save()
             return Response(status=status.HTTP_201_CREATED)
         return Response(productform.errors, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
+    except:
         return Response(
-            f"\n\n{e}\n\nOcorreu um erro interno ao tentar cadastrar um novo produto, por gentileza contacte o nosso suporte.",
+            f"Ocorreu um erro interno ao tentar cadastrar um novo produto, por gentileza contacte o nosso suporte.",
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         
@@ -55,9 +55,9 @@ def update(request):
             productForm.save()
             return Response(status=status.HTTP_200_OK)
         return Response(productForm.errors, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
+    except:
         return Response(
-            f"\n\n{e}\n\nOcorreu um erro interno ao tentar editar um produto, por gentileza contacte o nosso suporte.",
+            f"Ocorreu um erro interno ao tentar editar um produto, por gentileza contacte o nosso suporte.",
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         
@@ -71,8 +71,8 @@ def delete(request):
 
         Product.delete(product)
         return Response(status=status.HTTP_200_OK)
-    except Exception as e:
+    except:
         return Response(
-            f"\n\n{e}\n\nOcorreu um erro interno ao tentar deletar um produto, por gentileza contacte o nosso suporte.",
+            f"Ocorreu um erro interno ao tentar deletar um produto, por gentileza contacte o nosso suporte.",
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
